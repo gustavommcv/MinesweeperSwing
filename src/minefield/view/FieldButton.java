@@ -6,6 +6,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
 import minefield.model.Field;
 import minefield.model.enums.FieldEvent;
@@ -49,11 +50,17 @@ public class FieldButton extends JButton implements FieldObserver, MouseListener
                 applyDefaultStyle();
                 break;
         }
+        
+        SwingUtilities.invokeLater(() -> {
+            repaint();
+            validate();
+        });
     }
 
     private void applyDefaultStyle() {
         setBackground(DEFAULT_BACK_GROUND);
         setText("");
+        setBorder(BorderFactory.createBevelBorder(0));
     }
 
     private void applyExplodeStyle() {

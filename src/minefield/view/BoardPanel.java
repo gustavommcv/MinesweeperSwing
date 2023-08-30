@@ -1,6 +1,8 @@
 package minefield.view;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import minefield.model.Board;
 
@@ -14,7 +16,15 @@ public class BoardPanel extends JPanel {
         board.forEachField(f -> add(new FieldButton(f)));
         
         board.addObserver(e -> {
-            // TODO Show result on screen
+            SwingUtilities.invokeLater(() -> {
+                if(e.isWon()) {
+                    JOptionPane.showMessageDialog(this, "Won!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Game Over!");
+                }
+
+                board.restart();
+            });
         });
     }
 }
