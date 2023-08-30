@@ -10,9 +10,9 @@ import minefield.model.interfaces.FieldObserver;
 
 public class Board implements FieldObserver {
 
-	private int rows;
-	private int columns;
-	private int mines;
+	private final int rows;
+	private final int columns;
+	private final int mines;
 
 	private final List<Field> fields = new ArrayList<>();
 
@@ -26,6 +26,18 @@ public class Board implements FieldObserver {
 		generateFields();
 		associateNeighbors();
 		randomizeMines();
+	}
+
+	public int getRows() {
+		return this.rows;
+	}
+
+	public int getColumns() {
+		return this.columns;
+	}
+
+	public void forEachField(Consumer<Field> func) {
+		fields.forEach(func);
 	}
 
 	public void addObserver(Consumer<EventResult> observer) {
@@ -51,7 +63,7 @@ public class Board implements FieldObserver {
 	private void showMines() {
 		fields.stream()
 			.filter(f -> f.isMined())
-			.forEach(f -> f.setOpened(isObjectiveAchieved()));
+			.forEach(f -> f.setOpened(true));
 	}
 
 	public void toggleMark(int row, int column) {

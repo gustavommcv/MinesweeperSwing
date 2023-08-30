@@ -60,7 +60,7 @@ public class Field {
 		}
 	}
 
-	void toggleMark() {
+	public void toggleMark() {
 		if (!opened) {
 			marked = !marked;
 
@@ -72,7 +72,7 @@ public class Field {
 		}
 	}
 
-	boolean open() {
+	public boolean open() {
 
 		if (!opened && !marked) {
 
@@ -93,7 +93,7 @@ public class Field {
 		}
 	}
 
-	boolean isSafeNeighborhood() {
+	public boolean isSafeNeighborhood() {
 		return neighbors.stream().noneMatch(n -> n.mined);
 	}
 
@@ -139,8 +139,8 @@ public class Field {
 		return revealed || protectedField;
 	}
 
-	long minesInNeighborhood() {
-		return neighbors.stream().filter(n -> n.mined).count();
+	public int minesInNeighborhood() {
+		return (int) neighbors.stream().filter(n -> n.mined).count();
 	}
 
 	void restart() {
