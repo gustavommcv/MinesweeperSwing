@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import org.w3c.dom.events.Event;
-
 import minefield.model.enums.FieldEvent;
 import minefield.model.interfaces.FieldObserver;
 
