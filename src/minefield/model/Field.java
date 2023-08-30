@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import minefield.model.enums.FieldEvent;
+import minefield.model.interfaces.FieldObserver;
 
 public class Field {
 

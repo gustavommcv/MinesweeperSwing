@@ -2,15 +2,23 @@ package minefield.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class Board {
+import org.w3c.dom.events.Event;
+
+import minefield.model.enums.FieldEvent;
+import minefield.model.interfaces.FieldObserver;
+
+public class Board implements FieldObserver {
 
 	private int rows;
 	private int columns;
 	private int mines;
 
 	private final List<Field> fields = new ArrayList<>();
+
+	private List<Consumer<EventResult>> observers = new ArrayList<>();
 
 	public Board(int rows, int columns, int mines) {
 		this.rows = rows;
@@ -22,17 +30,30 @@ public class Board {
 		randomizeMines();
 	}
 
+	public void addObserver(Consumer<EventResult> observer) {
+		observers.add(observer);
+	}
+
+	public void removeObserver(Consumer<EventResult> observer) {
+        observers.remove(observer);
+    }
+
+	private void notifyObservers(boolean result) {
+    	observers.stream()
+			.forEach(o -> o.accept(new EventResult(result)));
+    }
+
 	public void open(int row, int column) {
-		try {
-			fields.parallelStream()
-				.filter(f -> f.getRow() == row && f.getColumn() == column)
-				.findFirst()
-				.ifPresent(f -> f.open());
-		} catch (Exception e) {
-			// FIXME Adjust the implementation of the open method
-			fields.forEach(f -> f.setOpened(true));
-			throw e;
-		}
+		fields.parallelStream()
+			.filter(f -> f.getRow() == row && f.getColumn() == column)
+			.findFirst()
+			.ifPresent(f -> f.open());
+	}
+	
+	private void showMines() {
+		fields.stream()
+			.filter(f -> f.isMined())
+			.forEach(f -> f.setOpened(isObjectiveAchieved()));
 	}
 
 	public void toggleMark(int row, int column) {
@@ -45,7 +66,9 @@ public class Board {
 	private void generateFields() {
 		for (int row = 0; row < rows; row++) {
 			for (int column = 0; column < columns; column++) {
-				fields.add(new Field(row, column));
+				Field field = new Field(row, column);
+				field.addObserver(this);
+				fields.add(field);
 			}
 		}
 	}
@@ -76,5 +99,15 @@ public class Board {
 	public void restart() {
 		fields.stream().forEach(f -> f.restart());
 		randomizeMines();
+	}
+
+	@Override
+	public void eventOccurred(Field field, FieldEvent event) {
+		if (event == FieldEvent.EXPLODE) {
+			showMines();
+			notifyObservers(false);
+		} else if (isObjectiveAchieved()) {
+			notifyObservers(true);
+		}
 	}
 }
