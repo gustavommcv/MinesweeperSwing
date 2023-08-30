@@ -1,7 +1,11 @@
 package minefield.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import minefield.model.enums.FieldEvent;
 
 public class Field {
 
@@ -14,10 +18,26 @@ public class Field {
 
 	private List<Field> neighbors = new ArrayList<>();
 
+	private Set<FieldObserver> observers = new HashSet<>();
+
 	Field(int row, int column) {
 		this.row = row;
 		this.column = column;
 	}
+
+	public void addObserver(FieldObserver observer) {
+		observers.add(observer);
+	}
+
+	public void removeObserver(FieldObserver observer) {
+        observers.remove(observer);
+    }
+
+	private void notifyObservers(FieldEvent event) {
+    	for (FieldObserver observer : observers) {
+        	observer.eventOccurred(this, event);
+        }
+    }
 
 	boolean addNeighbor(Field neighbor) {
 		boolean differentRow = row != neighbor.row;
@@ -42,18 +62,26 @@ public class Field {
 	void toggleMark() {
 		if (!opened) {
 			marked = !marked;
+
+			if (marked) {
+				notifyObservers(FieldEvent.MARK);
+			} else {
+				notifyObservers(FieldEvent.UNMARK);
+			}
 		}
 	}
 
 	boolean open() {
 
 		if (!opened && !marked) {
-			opened = true;
 
 			if (mined) {
-				// TODO Implement new version
+				notifyObservers(FieldEvent.EXPLODE);
+				return true;
 			}
 
+			setOpened(true);
+			
 			if (isSafeNeighborhood()) {
 				neighbors.forEach(n -> n.open());
 			}
@@ -82,6 +110,10 @@ public class Field {
 
 	void setOpened(boolean opened) {
 		this.opened = opened;
+
+		if (opened) {
+			notifyObservers(FieldEvent.OPEN);
+		}
 	}
 
 	public boolean isOpened() {
